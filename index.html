@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa Teste</title>
+  <title>Mapa com Localização do Servidor</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     html, body { height: 100%; margin: 0; }
@@ -12,13 +12,29 @@
 </head>
 <body>
   <div id="map"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([-23.5, -46.6], 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
-    L.marker([-23.5, -46.6]).addTo(map).bindPopup("Você está aqui!").openPopup();
+
+    let marker = L.marker([-23.5, -46.6]).addTo(map).bindPopup("Localização do dispositivo").openPopup();
+
+    function atualizarLocalizacao() {
+      fetch("https://location-server-rsix.onrender.com/get-location") // use seu link aqui
+        .then(res => res.json())
+        .then(data => {
+          const novaPos = [data.lat, data.lng];
+          marker.setLatLng(novaPos);
+          map.setView(novaPos);
+        })
+        .catch(err => console.error("Erro ao buscar localização:", err));
+    }
+
+    atualizarLocalizacao(); // primeira chamada
+    setInterval(atualizarLocalizacao, 5000); // atualiza a cada 5 segundos
   </script>
 </body>
 </html>
